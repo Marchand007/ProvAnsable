@@ -1,10 +1,10 @@
 ---
-- name: Install and configure HTTPd server
-  hosts: 192.168.33.{{ip2}}
+- name: Install and configure PHP and PostgreSQL client
+  hosts: 192.168.33.{{ ip2 }}
   become: yes
 
   tasks:
-    - name: Install PHP8.2
+    - name: Install PHP 8.2
       apt:
         name: "{{ item }}"
         state: present
@@ -13,6 +13,11 @@
         - php8.2-cli
         - php8.2-mysql
       when: ansible_os_family == 'Debian'
+
+    - name: Install PostgreSQL client
+      package:
+        name: postgresql
+        state: present
 
     - name: Copy the file to /var/www/html
       ansible.builtin.copy:
@@ -27,12 +32,17 @@
         group: www-data
         state: file
       when: copy_result.changed
-      
-    - name: "Start and enable services"
-      service: "name={{ item }} state=started enabled=yes"
-      with_items:
+
+    - name: Start and enable services
+      service:
+        name: "{{ item }}"
+        state: started
+        enabled: yes
+      loop:
         - postgresql
 
   handlers:
-    - name: restart postgres
-      service: name=postgresql state=restarted
+    - name: Restart PostgreSQL
+      service:
+        name: postgresql
+        state: restarted
