@@ -1,0 +1,22 @@
+#   NewTech First Problematic
+#   
+#   This Vagrantfile starts a VM used to provision new customer
+#   in the Acme entreprises. When this VM is provisioning itself,
+#   it installed the required packages to install ansible.
+#
+#   This VM will have the 192.168.33.5 IP address. Keep in mind
+#   that the IP addresses below .10 are reserved for global VM
+#   with generic purposes.
+
+Vagrant.configure("2") do |config|
+    config.vm.define "ansible" do |ansible|
+    ansible.vm.box = "jaca1805/debian12" 
+    ansible.vm.network "private_network", ip: "192.168.33.5"
+    ansible.vm.provider "virtualbox" do |vb|
+      vb.memory = "1024"
+      vb.cpus = "2"
+    end
+    ansible.vm.provision "shell", path: "ansible.sh"
+    ansible.vm.synced_folder "./config", "/home/vagrant/config" 
+  end
+end 

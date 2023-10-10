@@ -1,0 +1,5 @@
+#!/bin/bash
+
+ssh-copy-id {{user}}@{{ip1}}
+ssh-copy-id {{user}}@{{ip2}}
+ssh-copy-id {{user}}@{{ip3}}

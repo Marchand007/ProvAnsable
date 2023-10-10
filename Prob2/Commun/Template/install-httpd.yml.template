@@ -1,0 +1,24 @@
+- name: Install and configure HTTPd server
+  hosts: {{ip2}}
+  become: yes
+  become_user: {{becomeuser}}
+
+  tasks:
+    - name: Install Apache2
+      apt:
+        name: apache2
+        state: present
+
+    - name: Install PostgreSQL Client
+      apt:
+        name: postgresql-client
+        state: present
+
+    - name: Install PHP8.2
+      apt:
+        name: "{{ item }}"
+        state: present
+      loop:
+        - php8.2
+        - php8.2-cli
+        - php8.2-mysql

@@ -1,0 +1,10 @@
+- name: Install and configure HTTPd server
+  hosts: {{ip1}}
+  become: yes
+  become_user: {{becomeuser}}
+
+  tasks:
+    - name: Install Apache2
+      apt:
+        name: apache2
+        state: present
