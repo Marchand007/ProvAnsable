@@ -72,7 +72,7 @@ if ($isAdmin) {
             New-AzVm `
                 -ResourceGroupName $resourceGroupName `
                 -Name $clientName"-static" `
-                -ImageName UbuntuLTS `
+                -ImageName Debian11 `
                 -Size Standard_B1s `
                 -Location canadacentral `
                 -VirtualNetworkName $clientName"-vnet" `
@@ -83,7 +83,7 @@ if ($isAdmin) {
             New-AzVm `
                 -ResourceGroupName $resourceGroupName `
                 -Name $clientName"-httpd" `
-                -ImageName UbuntuLTS `
+                -ImageName Debian11 `
                 -Size Standard_B1s `
                 -Location canadacentral `
                 -VirtualNetworkName $clientName"-vnet" `
@@ -95,7 +95,7 @@ if ($isAdmin) {
             New-AzVm `
                 -ResourceGroupName $resourceGroupName `
                 -Name $clientName"-postgresql" `
-                -ImageName UbuntuLTS `
+                -ImageName Debian11 `
                 -Size Standard_B1s `
                 -Location canadacentral `
                 -VirtualNetworkName $clientName"-vnet" `
@@ -110,12 +110,18 @@ if ($isAdmin) {
             $postgresqlVMPublicIp = Get-AzPublicIpAddress -Name $clientName"-postgresql-ip" -ResourceGroupName $resourceGroupName
 
             Add-Content $PSScriptRoot/config/hosts -Value [$clientname]
-            Add-Content $PSScriptRoot/config/hosts -Value ($staticVMPublicIp.IpAddress)
-            Add-Content $PSScriptRoot/config/hosts -Value ($httpdVMPublicIp.IpAddress)
-            Add-Content $PSScriptRoot/config/hosts -Value ($postgresqlVMPublicIp.IpAddress)
+            Add-Content $PSScriptRoot/config/hosts -Value ($staticVMPublicIp.IpAddress + " ansible_ssh_user=" + $adminUser) 
+            Add-Content $PSScriptRoot/config/hosts -Value ($httpdVMPublicIp.IpAddress + " ansible_ssh_user=" + $adminUser)
+            Add-Content $PSScriptRoot/config/hosts -Value ($postgresqlVMPublicIp.IpAddress + " ansible_ssh_user=" + $adminUser)
             Add-Content $PSScriptRoot/config/hosts -Value ""
 
             New-Item -Path $PSScriptRoot/config -Name "$clientname" -ItemType Directory
+
+            Copy-Item "$PSScriptRoot/template/upgrade.yml.template" -Destination "$PSScriptRoot/config/$clientname/upgrade.yml"
+            $content = Get-Content -Path "$PSScriptRoot/config/$clientname/upgrade.yml"
+            $content = $content -replace '{{ClientName}}', ($clientname)
+            Set-Content "$PSScriptRoot/config/$clientname/upgrade.yml" -Value $content
+            
 
             Copy-Item "$PSScriptRoot/template/install-static.yml.template" -Destination "$PSScriptRoot/config/$clientname/install-static.yml"
             $content = Get-Content -Path "$PSScriptRoot/config/$clientname/install-static.yml"
@@ -136,6 +142,7 @@ if ($isAdmin) {
             $content = $content -replace '{{db_name}}', ($clientname + "-db")
             $content = $content -replace '{{db_user}}', ($clientname)
             $content = $content -replace '{{password}}', ($clientname + '12345*')
+            $content = $content -replace '{{adminuser}}', ($adminUser)
             Set-Content "$PSScriptRoot/config/$clientname/install-postgresql.yml" -Value $content
         
             Copy-Item "$PSScriptRoot/template/setupssh.sh.template" -Destination "$PSScriptRoot/config/$clientname/setupssh.sh"
@@ -150,6 +157,12 @@ if ($isAdmin) {
             $content = Get-Content -Path "$PSScriptRoot/config/$clientname/playbook.sh"
             $content = $content -replace '{{ClientName}}', ($clientname)
             Set-Content "$PSScriptRoot/config/$clientname/playbook.sh" -Value $content
+
+            Copy-Item "$PSScriptRoot/template/clone-repo.yml.template" -Destination "$PSScriptRoot/config/$clientname/clone-repo.yml"
+            $content = Get-Content -Path "$PSScriptRoot/config/$clientname/clone-repo.yml"
+            $content = $content -replace '{{ip1}}', ($staticVMPublicIp.IpAddress)
+            $content = $content -replace '{{reponame}}', ($repoCloneUrl)
+            Set-Content "$PSScriptRoot/config/$clientname/clone-repo.yml" -Value $content
 
             Set-Location "$PSScriptRoot"
 

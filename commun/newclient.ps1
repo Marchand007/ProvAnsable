@@ -6,7 +6,7 @@ $principal = new-object System.Security.Principal.WindowsPrincipal([System.Secur
 
 if (!$principal.IsInRole([System.Security.Principal.WindowsBuiltInRole]::Administrator)) {
     $stopascii = get-content -path ~/Project/NewTech/commun/stop.txt
-    echo $stopascii
+    Write-Output $stopascii
 }
 else {
     if ($clientname -and !$configDirClientnameExist -and !$dirClientnameExist) {

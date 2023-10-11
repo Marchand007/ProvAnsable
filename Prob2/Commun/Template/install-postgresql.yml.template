@@ -1,6 +1,6 @@
 - hosts: {{ip3}}
   become: yes
-  become_user: {{becomeuser}}
+
   vars:
     postgresql_version: '13'
     postgresql_db: '{{db_name}}'
@@ -24,6 +24,7 @@
       apt_repository:
         repo: "deb http://apt.postgresql.org/pub/repos/apt/ {{ ansible_lsb.codename }}-pgdg main {{ postgresql_version }}"
         state: present
+        update_cache: yes
     
     - name: Install PostgreSQL
       apt:
@@ -34,7 +35,7 @@
 
     - name: Check if the password has been set
       stat:
-        path: "/home/vagrant/.pgpass"
+        path: "/home/{{adminuser}}/.pgpass"
       register: password_marker
 
     - name: Change the password for the postgres user
@@ -47,9 +48,9 @@
     - name: Add .pgpass file
       ansible.builtin.copy:
         src: /home/vagrant/config/ansible/.pgpass
-        dest: /home/vagrant/.pgpass
-        owner: vagrant
-        group: vagrant
+        dest: /home/{{adminUser}}/.pgpass
+        owner: {{adminuser}}
+        group: {{adminuser}}
         mode: '0600'
 
     - name: Replace config file
@@ -71,16 +72,12 @@
         password: "{{ postgresql_password }}"
         role_attr_flags: CREATEDB,NOSUPERUSER
         login_user: postgres
-      become: yes
-      become_user: vagrant
 
     - name: Create a new database
       postgresql_db:
         name: "{{ postgresql_db }}"
         owner: "{{ postgresql_user }}"
         login_user: postgres
-      become: yes
-      become_user: vagrant
 
     - name: Allow remote connections to PostgreSQL
       lineinfile:
