@@ -1,0 +1,15 @@
+###
+GET http://localhost:13370/setup
+
+###
+POST http://localhost:13370
+Content-Type: application/json
+
+{
+    "name": "Maxime Marchand",
+    "location": "Sherbrooke"
+}
+
+###
+GET http://localhost:13370
+
