@@ -44,7 +44,7 @@ app.post('/', async (req, res) =>
     {
         await pool.query(`INSERT INTO schools (name, address) VALUES ($1, $2)`,[name,location]);
         res.status(200).send({
-            message: `SUCCESS - Children created : ${name} (${location})`
+            message: `SUCCESS - child created : ${name} (${location})`
         })
     }
     catch (err)

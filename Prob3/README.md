@@ -18,8 +18,7 @@ Dans le fichier test.rest, roules les 3 tests en ordre.
 
 ## Mise à jour
 
-Lors d'une mise à jour du code, le tout devrait se mettre à jour automatiquement. Cela fonctionne sur l'ordinateur de Michael Beauchamps avec mon code. 
-Par contre, présentement, simplement faire un `docker-compose up` afin d'avoir les mises à jour.
+Lors d'une mise à jour du code et de la sauvegarde de celui ci, le conteneur se met a jour avec le nouveau code et il repart automatiquement
 
 
 ## Projet fait par 
